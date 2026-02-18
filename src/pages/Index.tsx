@@ -291,36 +291,52 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Skip to main content link for screen readers */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      >
+        Saltar al contenido principal
+      </a>
+
       <Header isAdmin={isAdmin} onLogout={handleLogout} />
 
       {/* Hero Section con Carrusel */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden" aria-label="Galería de imágenes">
         {/* Carrusel con contenido integrado */}
         <HeroCarousel />
       </section>
 
       {/* Calendar Section */}
-      <section className="pt-8 pb-12 md:pt-10 md:pb-16">
+      <section 
+        id="main-content"
+        className="pt-6 sm:pt-8 pb-10 sm:pb-12 md:pt-10 md:pb-16"
+        aria-labelledby="calendar-heading"
+      >
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             {/* Botón ¿QUÉ INCLUYE? */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-4 sm:mb-6">
               <Button
                 onClick={() => setShowIncludesModal(true)}
                 variant="outline"
                 size="lg"
-                className="gap-2 text-primary border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-md hover:shadow-lg"
+                className="gap-2 text-primary border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-md hover:shadow-lg min-h-[44px] focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Ver qué incluye el servicio"
               >
-                <HelpCircle className="w-5 h-5" />
+                <HelpCircle className="w-5 h-5" aria-hidden="true" />
                 ¿QUÉ INCLUYE?
               </Button>
             </div>
 
-            <div className="text-center mb-10">
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="text-center mb-6 sm:mb-10">
+              <h2 
+                id="calendar-heading"
+                className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4"
+              >
                 Calendario de Disponibilidad
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground px-4">
                 Selecciona una fecha para ver su disponibilidad
               </p>
             </div>
@@ -337,49 +353,67 @@ const Index = () => {
       </section>
 
       {/* Contact Info Section */}
-      <section className="py-12 md:py-16 bg-card">
+      <section 
+        className="py-10 sm:py-12 md:py-16 bg-card"
+        aria-labelledby="contact-heading"
+      >
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-6 justify-items-center">
-              <div className="w-full max-w-md flex items-start gap-4 p-6 rounded-2xl bg-background shadow-elegant animate-fade-in">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <h2 
+              id="contact-heading"
+              className="sr-only"
+            >
+              Información de contacto
+            </h2>
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 justify-items-center">
+              <div className="w-full max-w-md flex flex-col sm:flex-row sm:items-start gap-4 p-4 sm:p-6 rounded-2xl bg-background shadow-elegant animate-fade-in">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0" aria-hidden="true">
                   <MapPin className="w-6 h-6 text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-1">Ubicación</h3>
-                  <p className="text-muted-foreground text-sm">
+                <div className="flex-1">
+                  <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-1">Ubicación</h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm mb-3">
                     Santiago Roel 217, Burócratas del Estado
                   </p>
                   <a
                     href="https://share.google/jeCsdpjUb2j5dEPy1"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 block w-full max-w-[320px] mx-auto rounded-xl overflow-hidden border border-border shadow-sm"
-                    aria-label="Abrir ubicación en Google Maps"
+                    className="mt-3 block w-full max-w-[320px] mx-auto rounded-xl overflow-hidden border border-border shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    aria-label="Abrir ubicación en Google Maps - Santiago Roel 217, Burócratas del Estado"
                   >
                     <div className="flex items-center justify-center bg-background/60">
                       <iframe
-                        title="Mini mapa"
+                        title="Mapa de ubicación - Santiago Roel 217, Burócratas del Estado"
                         src="https://www.google.com/maps?q=Santiago%20Roel%20217%2C%20Bur%C3%B3cratas%20del%20Estado&output=embed"
-                        className="block w-full h-40"
+                        className="block w-full h-32 sm:h-40"
                         loading="lazy"
+                        aria-label="Mapa interactivo de la ubicación"
                       />
                     </div>
                   </a>
                 </div>
               </div>
 
-              <div className="w-full max-w-md flex flex-col items-center justify-center gap-4 p-8 rounded-2xl bg-background shadow-elegant animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Phone className="w-8 h-8 text-primary" />
+              <div className="w-full max-w-md flex flex-col items-center justify-center gap-4 p-6 sm:p-8 rounded-2xl bg-background shadow-elegant animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-primary/10 flex items-center justify-center" aria-hidden="true">
+                  <Phone className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <div className="text-center">
-                  <h3 className="font-display text-2xl font-semibold text-foreground mb-3">Teléfono</h3>
-                  <div className="text-muted-foreground text-base space-y-2">
-                    <a href="tel:+528110803130" className="block hover:underline text-lg">
+                  <h3 className="font-display text-xl sm:text-2xl font-semibold text-foreground mb-3">Teléfono</h3>
+                  <div className="text-muted-foreground text-sm sm:text-base space-y-2">
+                    <a 
+                      href="tel:+528110803130" 
+                      className="block hover:underline text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-lg focus:px-2 focus:py-1 min-h-[44px] flex items-center justify-center"
+                      aria-label="Llamar al teléfono +52 8110803130"
+                    >
                       +52 8110803130
                     </a>
-                    <a href="tel:+528118166128" className="block hover:underline text-lg">
+                    <a 
+                      href="tel:+528118166128" 
+                      className="block hover:underline text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-lg focus:px-2 focus:py-1 min-h-[44px] flex items-center justify-center"
+                      aria-label="Llamar al teléfono +52 8118166128"
+                    >
                       +52 8118166128
                     </a>
                   </div>
@@ -392,14 +426,18 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-border">
+      <footer 
+        className="py-6 sm:py-8 border-t border-border"
+        role="contentinfo"
+      >
         <div className="container mx-auto px-4">
-          <div className="text-center text-muted-foreground text-sm">
+          <div className="text-center text-muted-foreground text-xs sm:text-sm">
             <p>
               © 2026 Al Pie del Asador.{' '}
               <button 
                 onClick={() => setShowLoginModal(true)}
-                className="hover:text-primary transition-colors cursor-pointer"
+                className="hover:text-primary transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:rounded-lg focus:px-2 focus:py-1 min-h-[44px]"
+                aria-label="Iniciar sesión como administrador"
               >
                 Todos los derechos reservados.
               </button>

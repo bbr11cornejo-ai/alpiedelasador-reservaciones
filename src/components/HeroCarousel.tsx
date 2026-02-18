@@ -147,10 +147,12 @@ export const HeroCarousel = () => {
     <>
       {/* Carrusel principal */}
       <div 
-        className="relative w-full h-[500px] md:h-[600px]"
+        className="relative w-full h-[400px] sm:h-[500px] md:h-[600px]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        role="region"
+        aria-label="Galería de imágenes"
       >
         {/* Imágenes */}
         {IMAGES.map((img, index) => (
@@ -184,11 +186,11 @@ export const HeroCarousel = () => {
           <div className="absolute inset-0 gradient-subtle opacity-40" />
           <div className="container mx-auto px-4 relative h-full flex items-center">
             <div className="max-w-3xl mx-auto text-center animate-slide-up">
-              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 sm:mb-6 leading-tight px-4">
                 Tu Evento Perfecto
                 <span className="block text-primary">Al Pie del Asador</span>
               </h1>
-              <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+              <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 max-w-xl mx-auto px-4">
                 El plan perfecto empieza con el lugar correcto. Reserva nuestro espacio para tu próxima celebración.
               </p>
               <SocialButtons 
@@ -205,10 +207,10 @@ export const HeroCarousel = () => {
             e.stopPropagation();
             prevSlide();
           }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           aria-label="Imagen anterior"
         >
-          <ChevronLeft className="w-6 h-6 text-foreground" />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-foreground" aria-hidden="true" />
         </button>
 
         <button
@@ -216,14 +218,18 @@ export const HeroCarousel = () => {
             e.stopPropagation();
             nextSlide();
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110 min-h-[44px] min-w-[44px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           aria-label="Imagen siguiente"
         >
-          <ChevronRight className="w-6 h-6 text-foreground" />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-foreground" aria-hidden="true" />
         </button>
 
         {/* Indicadores de puntos */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-3">
+        <div 
+          className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2 sm:gap-3"
+          role="group"
+          aria-label="Indicadores de imágenes"
+        >
           {indicators}
         </div>
       </div>
