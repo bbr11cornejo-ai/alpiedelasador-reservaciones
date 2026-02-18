@@ -183,8 +183,9 @@ export const generateContract = (booking: Booking): string => {
     doc.text('TELÉFONO: 8118166128', rightSignatureX + signatureWidth / 2, signatureY + 14, { align: 'center' });
 
     // Generar el PDF como Data URL
+    const totalPages = doc.getNumberOfPages();
+    console.log(`✅ PDF generado correctamente con ${totalPages} página(s)`);
     const pdfUrl = doc.output('dataurlstring');
-    console.log('✅ PDF generado correctamente');
     return pdfUrl;
   } catch (error) {
     console.error('❌ Error generando contrato:', error);
