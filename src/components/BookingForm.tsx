@@ -85,43 +85,6 @@ const SCHEDULE_OPTIONS = {
   ]
 };
 
-const RESERVED_QUANTITY_OPTIONS = [
-  '500',
-  '1000',
-  '1500',
-  '2000',
-  '2500',
-  '3000',
-  '3500',
-  '4000',
-  '4500',
-  '5000',
-  '6000',
-  '7000',
-  '8000',
-  '9000',
-  '10000'
-];
-
-const RENTAL_COST_OPTIONS = [
-  '2000',
-  '2500',
-  '3000',
-  '3500',
-  '4000',
-  '4500',
-  '5000',
-  '5500',
-  '6000',
-  '6500',
-  '7000',
-  '7500',
-  '8000',
-  '8500',
-  '9000',
-  '9500',
-  '10000'
-];
 
 export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, onUpdate, onDelete, onMarkPaid, onShowContract, isAdmin }: BookingFormProps) => {
   const { toast } = useToast();
@@ -315,25 +278,19 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
               {/* Reserved Quantity */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-foreground">
+                <Label htmlFor="editReservedQuantity" className="flex items-center gap-2 text-foreground">
                   <Hash className="w-4 h-4 text-primary" />
                   $ Monto de la separación *
                 </Label>
-                <Select
+                <Input
+                  id="editReservedQuantity"
+                  type="number"
                   value={formData.reservedQuantity}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, reservedQuantity: value }))}
-                >
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Selecciona la cantidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RESERVED_QUANTITY_OPTIONS.map(quantity => (
-                      <SelectItem key={quantity} value={quantity}>
-                        ${quantity} MXN
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData(prev => ({ ...prev, reservedQuantity: e.target.value }))}
+                  placeholder="Ej: 1000"
+                  className="h-12 rounded-xl"
+                  min="0"
+                />
               </div>
 
               {/* Schedule */}
@@ -424,25 +381,19 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
               {/* Rental Cost */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-foreground">
+                <Label htmlFor="editRentalCost" className="flex items-center gap-2 text-foreground">
                   <DollarSign className="w-4 h-4 text-primary" />
                   Costo de Renta (MXN) *
                 </Label>
-                <Select
+                <Input
+                  id="editRentalCost"
+                  type="number"
                   value={formData.rentalCost}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, rentalCost: value }))}
-                >
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Selecciona el costo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RENTAL_COST_OPTIONS.map(cost => (
-                      <SelectItem key={cost} value={cost}>
-                        ${parseFloat(cost).toLocaleString('es-MX')} MXN
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData(prev => ({ ...prev, rentalCost: e.target.value }))}
+                  placeholder="Ej: 3500"
+                  className="h-12 rounded-xl"
+                  min="0"
+                />
               </div>
 
               {/* Status */}
@@ -904,25 +855,19 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
           {/* Reserved Quantity */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-foreground">
+            <Label htmlFor="reservedQuantity" className="flex items-center gap-2 text-foreground">
               <Hash className="w-4 h-4 text-primary" />
               $ Monto de la separación *
             </Label>
-            <Select
+            <Input
+              id="reservedQuantity"
+              type="number"
               value={formData.reservedQuantity}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, reservedQuantity: value }))}
-            >
-              <SelectTrigger className="h-12 rounded-xl">
-                <SelectValue placeholder="Selecciona la cantidad" />
-              </SelectTrigger>
-              <SelectContent>
-                {RESERVED_QUANTITY_OPTIONS.map(quantity => (
-                  <SelectItem key={quantity} value={quantity}>
-                    ${quantity} MXN
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(e) => setFormData(prev => ({ ...prev, reservedQuantity: e.target.value }))}
+              placeholder="Ej: 1000"
+              className="h-12 rounded-xl"
+              min="0"
+            />
           </div>
 
           {/* Schedule */}
@@ -1016,25 +961,19 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
           {/* Rental Cost */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-foreground">
+            <Label htmlFor="rentalCost" className="flex items-center gap-2 text-foreground">
               <DollarSign className="w-4 h-4 text-primary" />
               Costo de Renta (MXN) *
             </Label>
-            <Select
+            <Input
+              id="rentalCost"
+              type="number"
               value={formData.rentalCost}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, rentalCost: value }))}
-            >
-              <SelectTrigger className="h-12 rounded-xl">
-                <SelectValue placeholder="Selecciona el costo" />
-              </SelectTrigger>
-              <SelectContent>
-                {RENTAL_COST_OPTIONS.map(cost => (
-                  <SelectItem key={cost} value={cost}>
-                    ${parseFloat(cost).toLocaleString('es-MX')} MXN
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(e) => setFormData(prev => ({ ...prev, rentalCost: e.target.value }))}
+              placeholder="Ej: 3500"
+              className="h-12 rounded-xl"
+              min="0"
+            />
           </div>
 
           {/* Status */}
