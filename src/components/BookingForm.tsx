@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { X, User, Phone, Hash, Clock, PartyPopper, Timer, DollarSign, Check, Upload, Camera, Image as ImageIcon, Trash2, CheckCircle2, FileText } from 'lucide-react';
+import { X, User, Phone, Hash, Clock, PartyPopper, Timer, DollarSign, Check, Upload, Camera, Image as ImageIcon, Trash2, CheckCircle2, FileText, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ interface BookingFormProps {
   existingBooking?: Booking;
   onClose: () => void;
   onSave: (booking: Omit<Booking, 'id' | 'createdAt'> & { paymentProofFile?: File }) => void;
+  onUpdate?: (booking: Booking & { paymentProofFile?: File }) => void;
   onDelete?: (bookingId: string) => void;
   onMarkPaid?: (bookingId: string) => void;
   onShowContract?: (booking: Booking) => void;
@@ -122,12 +123,13 @@ const RENTAL_COST_OPTIONS = [
   '10000'
 ];
 
-export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, onDelete, onMarkPaid, onShowContract, isAdmin }: BookingFormProps) => {
+export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, onUpdate, onDelete, onMarkPaid, onShowContract, isAdmin }: BookingFormProps) => {
   const { toast } = useToast();
   const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPaidConfirm, setShowPaidConfirm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<'4h' | '6h' | '8h' | '12h'>('4h');
   const [formData, setFormData] = useState({
     clientName: existingBooking?.clientName || '',
@@ -193,6 +195,48 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
     });
   }, [formData, paymentProofFile, selectedDate, onSave, toast]);
 
+  const handleUpdate = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!existingBooking || !onUpdate) return;
+
+    // Validar campos obligatorios (sin validar paymentProofFile porque ya existe)
+    if (!formData.clientName || !formData.phone) {
+      toast({
+        title: "Campos obligatorios faltantes",
+        description: "Debes completar: Nombre del Cliente y Teléfono.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar campos restantes
+    if (!formData.reservedQuantity || !formData.schedule || !formData.eventType || !formData.duration || !formData.rentalCost) {
+      toast({
+        title: "Campos requeridos",
+        description: "Por favor completa todos los campos del formulario.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    onUpdate({
+      ...existingBooking,
+      date: selectedDate.toISOString().split('T')[0],
+      clientName: formData.clientName,
+      phone: formData.phone,
+      reservedQuantity: parseInt(formData.reservedQuantity, 10),
+      schedule: formData.schedule,
+      eventType: formData.eventType,
+      duration: formData.duration,
+      rentalCost: parseFloat(formData.rentalCost),
+      status: formData.status,
+      paymentProofFile: paymentProofFile || undefined
+    });
+    
+    setIsEditing(false);
+  }, [formData, paymentProofFile, selectedDate, existingBooking, onUpdate, toast]);
+
   if (!isAdmin) {
     return (
       <div className="fixed inset-0 bg-foreground/20 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -215,6 +259,310 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
   // Si existe una reservación, mostrar detalles en lugar del formulario
   if (existingBooking) {
+    // Modo de edición
+    if (isEditing) {
+      return (
+        <div className="fixed inset-0 bg-foreground/20 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-card rounded-2xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in modal-content">
+            {/* Header */}
+            <div className="sticky top-0 bg-card border-b border-border p-6 rounded-t-2xl z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-display text-xl font-semibold text-foreground">
+                    Editar Reservación
+                  </h3>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    {formatDate(selectedDate)}
+                  </p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)} className="rounded-xl">
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Edit Form */}
+            <form onSubmit={handleUpdate} className="p-6 space-y-5">
+              {/* Client Name */}
+              <div className="space-y-2">
+                <Label htmlFor="editClientName" className="flex items-center gap-2 text-foreground">
+                  <User className="w-4 h-4 text-primary" />
+                  Nombre del Cliente *
+                </Label>
+                <Input
+                  id="editClientName"
+                  value={formData.clientName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, clientName: e.target.value }))}
+                  placeholder="Nombre completo del cliente"
+                  className="h-12 rounded-xl"
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="editPhone" className="flex items-center gap-2 text-foreground">
+                  <Phone className="w-4 h-4 text-primary" />
+                  Teléfono *
+                </Label>
+                <Input
+                  id="editPhone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Ej: 33 1234 5678"
+                  className="h-12 rounded-xl"
+                />
+              </div>
+
+              {/* Reserved Quantity */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-foreground">
+                  <Hash className="w-4 h-4 text-primary" />
+                  $ Monto de la separación *
+                </Label>
+                <Select
+                  value={formData.reservedQuantity}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, reservedQuantity: value }))}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Selecciona la cantidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RESERVED_QUANTITY_OPTIONS.map(quantity => (
+                      <SelectItem key={quantity} value={quantity}>
+                        ${quantity} MXN
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Schedule */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2 text-foreground">
+                    <Clock className="w-4 h-4 text-primary" />
+                    Horario Acordado *
+                  </Label>
+                  <div className="flex gap-1">
+                    {(['4h', '6h', '8h', '12h'] as const).map((duration) => (
+                      <button
+                        key={duration}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDuration(duration);
+                          setFormData(prev => ({ ...prev, schedule: '' }));
+                        }}
+                        className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
+                          selectedDuration === duration
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                        }`}
+                      >
+                        {duration}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Select
+                  value={formData.schedule}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, schedule: value }))}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Selecciona el horario" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SCHEDULE_OPTIONS[selectedDuration].map(schedule => (
+                      <SelectItem key={schedule} value={schedule}>
+                        {schedule}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Event Type */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-foreground">
+                  <PartyPopper className="w-4 h-4 text-primary" />
+                  Tipo de Evento *
+                </Label>
+                <Select
+                  value={formData.eventType}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, eventType: value }))}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Selecciona el tipo de evento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EVENT_TYPES.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Duration */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-foreground">
+                  <Timer className="w-4 h-4 text-primary" />
+                  Duración *
+                </Label>
+                <Select
+                  value={formData.duration}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, duration: value }))}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Selecciona la duración" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DURATION_OPTIONS.map(duration => (
+                      <SelectItem key={duration} value={duration}>{duration}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Rental Cost */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-foreground">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                  Costo de Renta (MXN) *
+                </Label>
+                <Select
+                  value={formData.rentalCost}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, rentalCost: value }))}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="Selecciona el costo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RENTAL_COST_OPTIONS.map(cost => (
+                      <SelectItem key={cost} value={cost}>
+                        ${parseFloat(cost).toLocaleString('es-MX')} MXN
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-foreground">
+                  Estado de la Reservación
+                </Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as BookingStatus }))}
+                >
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="reserved">Reservado</SelectItem>
+                    <SelectItem value="occupied">Ocupado</SelectItem>
+                    <SelectItem value="free">Libre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Remaining Payment (calculated) */}
+              {formData.rentalCost && formData.reservedQuantity && (
+                <div className="p-4 rounded-xl bg-primary/10 border-2 border-primary/20">
+                  <Label className="text-muted-foreground text-sm block mb-2">Pago Restante</Label>
+                  <p className="font-bold text-2xl text-primary">
+                    ${remainingPayment.toLocaleString('es-MX')} MXN
+                  </p>
+                </div>
+              )}
+
+              {/* Payment Proof (optional update) */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-foreground">
+                  <Upload className="w-4 h-4 text-primary" />
+                  Comprobante de Pago (opcional - nuevo)
+                </Label>
+                
+                <div className="flex gap-2">
+                  <label className="flex-1 h-12 rounded-xl border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer flex items-center justify-center gap-2 transition-colors">
+                    <Upload className="w-4 h-4" />
+                    <span className="text-sm font-medium">Galería</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPaymentProofFile(file);
+                          toast({
+                            title: "Archivo seleccionado",
+                            description: file.name,
+                          });
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <label className="flex-1 h-12 rounded-xl border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer flex items-center justify-center gap-2 transition-colors">
+                    <Camera className="w-4 h-4" />
+                    <span className="text-sm font-medium">Cámara</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPaymentProofFile(file);
+                          toast({
+                            title: "Foto capturada",
+                            description: file.name,
+                          });
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {paymentProofFile ? (
+                  <p className="text-sm text-muted-foreground">
+                    Nuevo archivo: {paymentProofFile.name}
+                  </p>
+                ) : existingBooking.paymentProofUrl && (
+                  <p className="text-sm text-green-600">
+                    ✓ Ya tiene comprobante guardado
+                  </p>
+                )}
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-4 space-y-3">
+                <Button 
+                  type="submit" 
+                  variant="hero" 
+                  size="lg" 
+                  className="w-full"
+                >
+                  <Check className="w-5 h-5" />
+                  Guardar Cambios
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // Modo de visualización (detalles)
     return (
       <>
         <div className="fixed inset-0 bg-foreground/20 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -240,6 +588,19 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  {/* Botón Editar */}
+                  {onUpdate && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Editar
+                    </Button>
+                  )}
+                  
                   {/* Botón Marcar como Pagado */}
                   {onMarkPaid && !existingBooking.paid && (
                     <Button

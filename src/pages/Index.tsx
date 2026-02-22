@@ -6,7 +6,7 @@ import { BookingForm } from '@/components/BookingForm';
 import { SocialButtons } from '@/components/SocialButtons';
 import { Booking } from '@/types/booking';
 import { MapPin, Phone, Mail, HelpCircle, X, Armchair, Table2, Flame, Snowflake, Refrigerator, Microwave, Volume2, Bath, Droplet, Waves, Trash2 } from 'lucide-react';
-import { saveBookingToSheets, getBookingsFromSheets, deleteBookingFromSheets, markBookingAsPaid } from '@/services/googleSheets';
+import { saveBookingToSheets, getBookingsFromSheets, deleteBookingFromSheets, markBookingAsPaid, updateBookingInSheets } from '@/services/googleSheets';
 import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/services/auth';
 import { Button } from '@/components/ui/button';
@@ -266,6 +266,41 @@ const Index = () => {
     }
   };
 
+  const handleUpdateBooking = async (bookingData: Booking & { paymentProofFile?: File }) => {
+    try {
+      // Actualizar en Google Sheets
+      const updateResult = await updateBookingInSheets(bookingData, bookingData.paymentProofFile);
+      
+      if (updateResult.success) {
+        // Actualizar UI después de guardar en Sheets
+        setBookings(prev => prev.map(b => 
+          b.id === bookingData.id ? { ...bookingData } : b
+        ));
+        
+        toast({
+          title: "✅ Reservación actualizada",
+          description: "Los cambios se guardaron correctamente.",
+        });
+        
+        setSelectedDate(null);
+      } else {
+        toast({
+          title: "❌ Error",
+          description: `No se pudo actualizar: ${updateResult.error}`,
+          variant: "destructive"
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error actualizando reservación:', error);
+      toast({
+        title: "❌ Error",
+        description: "Hubo un problema al actualizar la reservación",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleShowContract = useCallback((booking: Booking) => {
     try {
       const pdfUrl = generateContract(booking);
@@ -453,6 +488,7 @@ const Index = () => {
           existingBooking={existingBooking}
           onClose={handleCloseForm}
           onSave={handleSaveBooking}
+          onUpdate={handleUpdateBooking}
           onDelete={handleDeleteBooking}
           onMarkPaid={handleMarkPaid}
           onShowContract={handleShowContract}

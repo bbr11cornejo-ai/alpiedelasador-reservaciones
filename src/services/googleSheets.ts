@@ -302,3 +302,89 @@ export const markBookingAsPaid = async (
     return { success: false, error: String(error) };
   }
 };
+
+// Actualizar una reservación existente en Google Sheets
+export const updateBookingInSheets = async (
+  booking: Booking,
+  paymentProofFile?: File
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    console.log('✏️ Actualizando reservación en Google Sheets...', booking);
+    
+    let paymentProofUrl = booking.paymentProofUrl || '';
+    
+    // Subir nueva foto a Cloudinary si existe
+    if (paymentProofFile) {
+      console.log('📷 Subiendo nueva foto a Cloudinary...');
+      try {
+        paymentProofUrl = await uploadToCloudinary(paymentProofFile);
+        console.log('✅ Foto subida a Cloudinary:', paymentProofUrl);
+      } catch (cloudinaryError) {
+        console.error('❌ Error subiendo a Cloudinary:', cloudinaryError);
+        return { 
+          success: false, 
+          error: 'No se pudo subir la foto. Intenta de nuevo.' 
+        };
+      }
+    }
+    
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'update',
+        bookingId: booking.id,
+        id: booking.id,
+        date: booking.date,
+        clientName: booking.clientName,
+        phone: booking.phone,
+        reservedQuantity: booking.reservedQuantity,
+        schedule: booking.schedule,
+        eventType: booking.eventType,
+        duration: booking.duration,
+        rentalCost: booking.rentalCost,
+        status: booking.status,
+        paymentProofUrl: paymentProofUrl,
+      }),
+    });
+
+    console.log('📥 Respuesta recibida:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Error desconocido');
+      console.error('❌ Error HTTP:', response.status, response.statusText, errorText);
+      
+      try {
+        const errorJson = JSON.parse(errorText);
+        return { 
+          success: false, 
+          error: errorJson.error || `Error ${response.status}: ${response.statusText}` 
+        };
+      } catch {
+        return { 
+          success: false, 
+          error: `Error ${response.status}: ${response.statusText}. ${errorText.substring(0, 100)}` 
+        };
+      }
+    }
+
+    const result = await response.json();
+    console.log('📦 Resultado parseado:', result);
+
+    if (result.success) {
+      console.log('✅ Reservación actualizada en Google Sheets');
+      return { success: true };
+    } else {
+      console.error('❌ Error del servidor:', result.error);
+      return { success: false, error: result.error || 'Error desconocido del servidor' };
+    }
+    
+  } catch (error) {
+    console.error('❌ Error de red:', error);
+    return { success: false, error: String(error) };
+  }
+};
