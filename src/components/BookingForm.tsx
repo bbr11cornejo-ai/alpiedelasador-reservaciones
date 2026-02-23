@@ -40,51 +40,6 @@ const DURATION_OPTIONS = [
   'Día completo'
 ];
 
-const SCHEDULE_OPTIONS = {
-  '4h': [
-    '09:00 - 13:00',
-    '10:00 - 14:00',
-    '11:00 - 15:00',
-    '12:00 - 16:00',
-    '13:00 - 17:00',
-    '14:00 - 18:00',
-    '15:00 - 19:00',
-    '16:00 - 20:00',
-    '17:00 - 21:00',
-    '18:00 - 22:00',
-    '19:00 - 23:00',
-    '20:00 - 00:00'
-  ],
-  '6h': [
-    '09:00 - 15:00',
-    '10:00 - 16:00',
-    '11:00 - 17:00',
-    '12:00 - 18:00',
-    '13:00 - 19:00',
-    '14:00 - 20:00',
-    '15:00 - 21:00',
-    '16:00 - 22:00',
-    '17:00 - 23:00',
-    '18:00 - 00:00'
-  ],
-  '8h': [
-    '09:00 - 17:00',
-    '10:00 - 18:00',
-    '11:00 - 19:00',
-    '12:00 - 20:00',
-    '13:00 - 21:00',
-    '14:00 - 22:00',
-    '15:00 - 23:00',
-    '16:00 - 00:00'
-  ],
-  '12h': [
-    '09:00 - 21:00',
-    '10:00 - 22:00',
-    '11:00 - 23:00',
-    '12:00 - 00:00'
-  ]
-};
-
 
 export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, onUpdate, onDelete, onMarkPaid, onShowContract, isAdmin }: BookingFormProps) => {
   const { toast } = useToast();
@@ -93,7 +48,6 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPaidConfirm, setShowPaidConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedDuration, setSelectedDuration] = useState<'4h' | '6h' | '8h' | '12h'>('4h');
   const [formData, setFormData] = useState({
     clientName: existingBooking?.clientName || '',
     phone: existingBooking?.phone || '',
@@ -295,46 +249,18 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
               {/* Schedule */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2 text-foreground">
-                    <Clock className="w-4 h-4 text-primary" />
-                    Horario Acordado *
-                  </Label>
-                  <div className="flex gap-1">
-                    {(['4h', '6h', '8h', '12h'] as const).map((duration) => (
-                      <button
-                        key={duration}
-                        type="button"
-                        onClick={() => {
-                          setSelectedDuration(duration);
-                          setFormData(prev => ({ ...prev, schedule: '' }));
-                        }}
-                        className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
-                          selectedDuration === duration
-                            ? 'bg-primary text-primary-foreground shadow-sm'
-                            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                      >
-                        {duration}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <Select
+                <Label htmlFor="editSchedule" className="flex items-center gap-2 text-foreground">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Horario Acordado *
+                </Label>
+                <Input
+                  id="editSchedule"
+                  type="text"
                   value={formData.schedule}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, schedule: value }))}
-                >
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue placeholder="Selecciona el horario" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SCHEDULE_OPTIONS[selectedDuration].map(schedule => (
-                      <SelectItem key={schedule} value={schedule}>
-                        {schedule}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData(prev => ({ ...prev, schedule: e.target.value }))}
+                  placeholder="Ej: 14:00 - 22:00"
+                  className="h-12 rounded-xl"
+                />
               </div>
 
               {/* Event Type */}
@@ -872,49 +798,18 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
 
           {/* Schedule */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-2 text-foreground">
-                <Clock className="w-4 h-4 text-primary" />
-                Horario Acordado *
-              </Label>
-              
-              {/* Botones de duración rápida */}
-              <div className="flex gap-1">
-                {(['4h', '6h', '8h', '12h'] as const).map((duration) => (
-                  <button
-                    key={duration}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDuration(duration);
-                      setFormData(prev => ({ ...prev, schedule: '' })); // Limpiar selección
-                    }}
-                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
-                      selectedDuration === duration
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    {duration}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <Select
+            <Label htmlFor="schedule" className="flex items-center gap-2 text-foreground">
+              <Clock className="w-4 h-4 text-primary" />
+              Horario Acordado *
+            </Label>
+            <Input
+              id="schedule"
+              type="text"
               value={formData.schedule}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, schedule: value }))}
-            >
-              <SelectTrigger className="h-12 rounded-xl">
-                <SelectValue placeholder="Selecciona el horario" />
-              </SelectTrigger>
-              <SelectContent>
-                {SCHEDULE_OPTIONS[selectedDuration].map(schedule => (
-                  <SelectItem key={schedule} value={schedule}>
-                    {schedule}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(e) => setFormData(prev => ({ ...prev, schedule: e.target.value }))}
+              placeholder="Ej: 14:00 - 22:00"
+              className="h-12 rounded-xl"
+            />
           </div>
 
           {/* Event Type */}
