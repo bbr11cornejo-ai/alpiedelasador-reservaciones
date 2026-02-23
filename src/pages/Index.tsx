@@ -27,7 +27,7 @@ const SAMPLE_BOOKINGS: Booking[] = [
     eventType: 'Boda',
     duration: '8 horas',
     rentalCost: 45000,
-    status: 'occupied',
+    status: 'paid',
     createdAt: new Date().toISOString()
   },
   {
@@ -231,39 +231,18 @@ const Index = () => {
     }
   };
 
-  const handleMarkPaid = async (bookingId: string) => {
-    try {
-      // Marcar como pagado en Google Sheets
-      const paidResult = await markBookingAsPaid(bookingId);
-      
-      if (paidResult.success) {
-        // Actualizar UI después de marcar como pagado
-        setBookings(prev => prev.map(b => 
-          b.id === bookingId ? { ...b, paid: true } : b
-        ));
-        
-        toast({
-          title: "✅ Marcado como Pagado",
-          description: "La reservación se marcó como pagada correctamente.",
-        });
-        
-        setSelectedDate(null);
-      } else {
-        toast({
-          title: "❌ Error",
-          description: `No se pudo marcar como pagado: ${paidResult.error}`,
-          variant: "destructive"
-        });
-      }
-      
-    } catch (error) {
-      console.error('Error marcando como pagado:', error);
-      toast({
-        title: "❌ Error",
-        description: "Hubo un problema al marcar la reservación como pagada",
-        variant: "destructive"
-      });
-    }
+  const handleMarkPaid = (bookingId: string) => {
+    // Solo cambiar el estado local a "paid", no guardar en Google Sheets
+    setBookings(prev => prev.map(b => 
+      b.id === bookingId ? { ...b, status: 'paid' } : b
+    ));
+    
+    toast({
+      title: "✅ Marcado como Pagado",
+      description: "El estado cambió a pagado (azul).",
+    });
+    
+    setSelectedDate(null);
   };
 
   const handleUpdateBooking = async (bookingData: Booking & { paymentProofFile?: File }) => {

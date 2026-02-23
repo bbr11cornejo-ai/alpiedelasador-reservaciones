@@ -27,8 +27,8 @@ export const BookingCalendar = ({ year, bookings, onDateSelect, selectedDate, is
     const booking = bookings.find(b => b.date === dateStr);
     const actualStatus = booking?.status || 'free';
     
-    // Para visitantes, mostrar "occupied" como "reserved" (amarillo)
-    if (!isAdmin && actualStatus === 'occupied') {
+    // Para visitantes, mostrar "paid" como "reserved" (amarillo)
+    if (!isAdmin && actualStatus === 'paid') {
       return 'reserved';
     }
     
@@ -75,8 +75,8 @@ export const BookingCalendar = ({ year, bookings, onDateSelect, selectedDate, is
         return 'bg-status-free-light border-status-free text-status-free hover:bg-status-free hover:text-primary-foreground';
       case 'reserved':
         return 'bg-status-reserved-light border-status-reserved text-status-reserved hover:bg-status-reserved hover:text-primary-foreground';
-      case 'occupied':
-        return 'bg-status-occupied-light border-status-occupied text-status-occupied hover:bg-status-occupied hover:text-primary-foreground';
+      case 'paid':
+        return 'bg-status-paid-light border-status-paid text-status-paid hover:bg-status-paid hover:text-primary-foreground';
     }
   };
 
@@ -93,8 +93,8 @@ export const BookingCalendar = ({ year, bookings, onDateSelect, selectedDate, is
         return 'Disponible';
       case 'reserved':
         return 'Reservado';
-      case 'occupied':
-        return 'Ocupado';
+      case 'paid':
+        return 'Pagado';
     }
   };
 
@@ -215,10 +215,10 @@ export const BookingCalendar = ({ year, bookings, onDateSelect, selectedDate, is
         {isAdmin && (
         <div className="flex items-center gap-2" role="listitem">
           <div 
-            className="w-4 h-4 rounded-md bg-status-occupied-light border-2 border-status-occupied" 
+            className="w-4 h-4 rounded-md bg-status-paid-light border-2 border-status-paid" 
             aria-hidden="true"
           />
-          <span className="text-xs sm:text-sm text-muted-foreground">Ocupado</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Pagado</span>
         </div>
         )}
       </div>

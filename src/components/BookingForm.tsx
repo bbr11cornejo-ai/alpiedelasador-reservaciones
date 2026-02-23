@@ -336,7 +336,7 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="reserved">Reservado</SelectItem>
-                    <SelectItem value="occupied">Ocupado</SelectItem>
+                    <SelectItem value="paid">Pagado</SelectItem>
                     <SelectItem value="free">Libre</SelectItem>
                   </SelectContent>
                 </Select>
@@ -452,12 +452,6 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
                     <h3 className="font-display text-xl font-semibold text-foreground">
                       Detalles de Reservación
                     </h3>
-                    {existingBooking.paid && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Pagado
-                      </span>
-                    )}
                   </div>
                   <p className="text-muted-foreground text-sm mt-1">
                     {formatDate(selectedDate)}
@@ -479,7 +473,7 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
                   )}
                   
                   {/* Botón Marcar como Pagado */}
-                  {onMarkPaid && !existingBooking.paid && (
+                  {onMarkPaid && existingBooking.status !== 'paid' && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -556,10 +550,10 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
                 <p className={`font-medium inline-block px-3 py-1 rounded-lg text-sm ${
                   existingBooking.status === 'free' ? 'bg-status-free-light text-status-free' :
                   existingBooking.status === 'reserved' ? 'bg-status-reserved-light text-status-reserved' :
-                  'bg-status-occupied-light text-status-occupied'
+                  'bg-status-paid-light text-status-paid'
                 }`}>
                   {existingBooking.status === 'free' ? 'Libre' : 
-                   existingBooking.status === 'reserved' ? 'Reservado' : 'Ocupado'}
+                   existingBooking.status === 'reserved' ? 'Reservado' : 'Pagado'}
                 </p>
               </div>
 
@@ -694,8 +688,8 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
                     ¿Marcar como Pagado?
                   </h3>
                   <p className="text-muted-foreground text-sm mb-6">
-                    Se marcará la reservación de <strong>{existingBooking.clientName}</strong> como pagada completamente. 
-                    Esto indica que ya se recibió el pago total.
+                    Se marcará la reservación de <strong>{existingBooking.clientName}</strong> como pagada (azul). 
+                    Este cambio solo es visual y no se guardará en Google Sheets.
                   </p>
                   <div className="flex gap-3">
                     <Button
@@ -885,7 +879,7 @@ export const BookingForm = ({ selectedDate, existingBooking, onClose, onSave, on
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="reserved">Reservado</SelectItem>
-                <SelectItem value="occupied">Ocupado</SelectItem>
+                <SelectItem value="paid">Pagado</SelectItem>
                 <SelectItem value="free">Libre</SelectItem>
               </SelectContent>
             </Select>

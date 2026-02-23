@@ -1,4 +1,4 @@
-export type BookingStatus = 'free' | 'reserved' | 'occupied';
+export type BookingStatus = 'free' | 'reserved' | 'paid';
 
 export interface Booking {
   id: string;

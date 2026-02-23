@@ -41,8 +41,8 @@
     --status-free-light: 145 60% 92%;
     --status-reserved: 38 85% 55%;
     --status-reserved-light: 38 85% 92%;
-    --status-occupied: 0 65% 50%;
-    --status-occupied-light: 0 65% 92%;
+    --status-paid: 217 91% 60%;
+    --status-paid-light: 217 91% 92%;
 
     /* Gradients - Orange */
     --gradient-hero: linear-gradient(135deg, hsl(25 85% 55%) 0%, hsl(25 80% 65%) 100%);

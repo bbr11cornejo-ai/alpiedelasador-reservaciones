@@ -56,8 +56,8 @@ export default {
           "free-light": "hsl(var(--status-free-light))",
           reserved: "hsl(var(--status-reserved))",
           "reserved-light": "hsl(var(--status-reserved-light))",
-          occupied: "hsl(var(--status-occupied))",
-          "occupied-light": "hsl(var(--status-occupied-light))",
+          paid: "hsl(var(--status-paid))",
+          "paid-light": "hsl(var(--status-paid-light))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
