@@ -262,8 +262,6 @@ const Index = () => {
     // Cerrar el formulario después de marcar como pagado
     setSelectedDate(null);
   };
-    setSelectedDate(null);
-  };
 
   const handleUpdateBooking = async (bookingData: Booking & { paymentProofFile?: File }) => {
     try {
