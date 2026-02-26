@@ -80,8 +80,18 @@ const Index = () => {
       const sheetsBookings = await getBookingsFromSheets();
       console.log('✅ Reservaciones cargadas exitosamente:', sheetsBookings.length);
       console.log('📋 Primeras 2 reservaciones:', sheetsBookings.slice(0, 2));
-      setBookings(sheetsBookings);
-      console.log('✅ Estado de bookings actualizado con', sheetsBookings.length, 'reservaciones');
+      
+      // Aplicar estado "paid" desde localStorage
+      const paidBookings = JSON.parse(localStorage.getItem('paidBookings') || '[]');
+      const bookingsWithPaidStatus = sheetsBookings.map(booking => {
+        if (paidBookings.includes(booking.id)) {
+          return { ...booking, status: 'paid' as const };
+        }
+        return booking;
+      });
+      
+      setBookings(bookingsWithPaidStatus);
+      console.log('✅ Estado de bookings actualizado con', bookingsWithPaidStatus.length, 'reservaciones');
     } catch (error: any) {
       console.error('❌ Error cargando reservaciones:', error);
       console.error('❌ Stack trace:', error.stack);
@@ -232,16 +242,26 @@ const Index = () => {
   };
 
   const handleMarkPaid = (bookingId: string) => {
-    // Solo cambiar el estado local a "paid", no guardar en Google Sheets
+    // Cambiar estado local a "paid"
     setBookings(prev => prev.map(b => 
       b.id === bookingId ? { ...b, status: 'paid' } : b
     ));
     
+    // Guardar en localStorage para persistir entre recargas
+    const paidBookings = JSON.parse(localStorage.getItem('paidBookings') || '[]');
+    if (!paidBookings.includes(bookingId)) {
+      paidBookings.push(bookingId);
+      localStorage.setItem('paidBookings', JSON.stringify(paidBookings));
+    }
+    
     toast({
       title: "✅ Marcado como Pagado",
-      description: "El estado cambió a pagado (azul).",
+      description: "El estado cambió a pagado (azul) y se guardó localmente.",
     });
     
+    // Cerrar el formulario después de marcar como pagado
+    setSelectedDate(null);
+  };
     setSelectedDate(null);
   };
 
