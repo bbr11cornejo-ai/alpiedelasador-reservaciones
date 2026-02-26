@@ -99,18 +99,18 @@ export const getBookingsFromSheets = async (): Promise<Booking[]> => {
           clientName: String(row.Cliente || row.clientName || ''),
           phone: String(row['Teléfono'] || row['Telefono'] || row.Telefono || row.phone || ''),
           reservedQuantity: Number(
+            row['Cantidad reservada $'] ||
             row['Cant. reservada'] ||
             row['Cant reservada'] ||
             row['Cantidad reservada'] ||
-            row['Cantidad reservada $'] ||
             row.reservedQuantity ||
             0
           ),
           schedule: String(row.Horario || row.schedule || ''),
           eventType: String(row['Tipo de Evento'] || row.eventType || ''),
-          duration: String(row.Duración || row.Duracion || row.duration || ''),
+          duration: String(row['Duración'] || row.Duracion || row.duration || ''),
           rentalCost: parseFloat(String(row.Costo || row.rentalCost || 0).replace(/[^0-9.-]/g, '')),
-          status: (String(row.Estado || row.status || 'free').toLowerCase() as 'free' | 'reserved' | 'occupied') || 'free',
+          status: (String(row.Estado || row.status || 'free').toLowerCase() as 'free' | 'reserved' | 'paid') || 'free',
           createdAt: String(row.Creado || row.createdAt || ''),
           paymentProofUrl: String(row['URL Comprobante'] || row['URL Comprobant'] || row.paymentProofUrl || ''),
           clientFolderId: String(row['ID Carpeta Drive'] || row.clientFolderId || ''),
