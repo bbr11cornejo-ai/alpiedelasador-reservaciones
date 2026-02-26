@@ -98,15 +98,10 @@ export const getBookingsFromSheets = async (): Promise<Booking[]> => {
           // Mapear todos los campos que vengan del backend (ya filtrados por el backend)
           clientName: String(row.Cliente || row.clientName || ''),
           phone: String(row['Teléfono'] || row['Telefono'] || row.Telefono || row.phone || ''),
-          reservedQuantity: Number(
-            row['Cantidad reservada $'] ||
-            row['Cant. reservada'] ||
-            row['Cant reservada'] ||
-            row['Cantidad reservada'] ||
-            row.reservedQuantity ||
-            0
-          ),
-          schedule: String(row.Horario || row.schedule || ''),
+          // NOTA: En el Sheet actual, "Horario" contiene números y "Cantidad reservada $" contiene strings de horario
+          // Por eso necesitamos mapear al revés de lo que dicen los nombres de columnas
+          schedule: String(row['Cantidad reservada $'] || row.Horario || row.schedule || ''),
+          reservedQuantity: Number(row.Horario || row['Cantidad reservada $'] || row.reservedQuantity || 0),
           eventType: String(row['Tipo de Evento'] || row.eventType || ''),
           duration: String(row['Duración'] || row.Duracion || row.duration || ''),
           rentalCost: parseFloat(String(row.Costo || row.rentalCost || 0).replace(/[^0-9.-]/g, '')),

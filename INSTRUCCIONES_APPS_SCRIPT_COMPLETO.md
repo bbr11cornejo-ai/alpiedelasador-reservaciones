@@ -10,15 +10,10 @@ function doPost(e) {
     const ss = SpreadsheetApp.openById('1A0reKhErc1MziKDIHmw5Iek0fz7cHljOm4iY-QPAVTU');
     let sheet = ss.getSheetByName('Reservaciones');
     
-    // Si no existe la hoja, crearla
+    // Si no existe la hoja, crearla con el orden correcto
     if (!sheet) {
       sheet = ss.insertSheet('Reservaciones');
-      sheet.appendRow(['ID', 'Fecha', 'Cliente', 'Teléfono', 'Cantidad reservada $', 'Horario', 'Tipo de Evento', 'Duración', 'Costo', 'Estado', 'Creado', 'URL Comprobante', 'ID Carpeta Drive', 'Pagado']);
-    }
-    
-    // Si es la primera fila, agregar encabezados
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['ID', 'Fecha', 'Cliente', 'Teléfono', 'Cantidad reservada $', 'Horario', 'Tipo de Evento', 'Duración', 'Costo', 'Estado', 'Creado', 'URL Comprobante', 'ID Carpeta Drive', 'Pagado']);
+      sheet.appendRow(['ID', 'Fecha', 'Cliente', 'Teléfono', 'Horario', 'Cantidad reservada $', 'Tipo de Evento', 'Duración', 'Costo', 'Estado', 'Creado', 'URL Comprobante', 'ID Carpeta Drive', 'Pagado']);
     }
     
     // Parsear los datos recibidos
@@ -32,8 +27,8 @@ function doPost(e) {
         data.date,
         data.clientName,
         data.phone || '',
-        data.reservedQuantity || '',
         data.schedule || '',
+        data.reservedQuantity || '',
         data.eventType || '',
         data.duration || '',
         data.rentalCost || '',
@@ -41,7 +36,7 @@ function doPost(e) {
         data.createdAt,
         data.paymentProofUrl || '',
         data.clientFolderId || '',
-        '' // Pagado por defecto vacío
+        ''
       ]);
       
       return ContentService.createTextOutput(JSON.stringify({
@@ -65,7 +60,7 @@ function doPost(e) {
       let rowIndex = -1;
       for (let i = 1; i < dataValues.length; i++) {
         if (String(dataValues[i][idColumnIndex]) === String(bookingId)) {
-          rowIndex = i + 1; // +1 porque las filas en Sheets son 1-indexed
+          rowIndex = i + 1;
           break;
         }
       }
@@ -74,27 +69,33 @@ function doPost(e) {
         throw new Error('Reservación no encontrada con ID: ' + bookingId);
       }
       
-      // Actualizar la fila (mantener ID y Creado originales)
+      // Obtener valores originales
       const originalCreatedAt = dataValues[rowIndex - 1][headers.indexOf('Creado')];
       const originalPaymentProof = dataValues[rowIndex - 1][headers.indexOf('URL Comprobante')] || '';
       const originalFolderId = dataValues[rowIndex - 1][headers.indexOf('ID Carpeta Drive')] || '';
-      const originalPagado = dataValues[rowIndex - 1][headers.indexOf('Pagado')] || '';
+      
+      // Buscar columna Pagado (con o sin espacio)
+      let pagadoIndex = headers.indexOf('Pagado');
+      if (pagadoIndex === -1) {
+        pagadoIndex = headers.indexOf('Pagado ');
+      }
+      const originalPagado = pagadoIndex !== -1 ? dataValues[rowIndex - 1][pagadoIndex] : '';
       
       sheet.getRange(rowIndex, 1, 1, 14).setValues([[
-        bookingId, // Mantener ID original
+        bookingId,
         data.date,
         data.clientName,
         data.phone || '',
-        data.reservedQuantity || '',
         data.schedule || '',
+        data.reservedQuantity || '',
         data.eventType || '',
         data.duration || '',
         data.rentalCost || '',
         data.status || 'reserved',
-        originalCreatedAt, // Mantener fecha de creación original
-        data.paymentProofUrl || originalPaymentProof, // Mantener foto si no se subió una nueva
+        originalCreatedAt,
+        data.paymentProofUrl || originalPaymentProof,
         data.clientFolderId || originalFolderId,
-        originalPagado // Mantener estado de Pagado
+        originalPagado
       ]]);
       
       return ContentService.createTextOutput(JSON.stringify({
@@ -114,7 +115,6 @@ function doPost(e) {
         throw new Error('Columna ID no encontrada');
       }
       
-      // Buscar la fila con el ID
       let rowIndex = -1;
       for (let i = 1; i < dataValues.length; i++) {
         if (String(dataValues[i][idColumnIndex]) === String(bookingId)) {
@@ -141,13 +141,17 @@ function doPost(e) {
       const dataValues = sheet.getDataRange().getValues();
       const headers = dataValues[0];
       const idColumnIndex = headers.indexOf('ID');
-      const pagadoColumnIndex = headers.indexOf('Pagado');
       
-      if (idColumnIndex === -1 || pagadoColumnIndex === -1) {
-        throw new Error('Columnas necesarias no encontradas');
+      // Buscar columna Pagado (con o sin espacio)
+      let pagadoColumnIndex = headers.indexOf('Pagado');
+      if (pagadoColumnIndex === -1) {
+        pagadoColumnIndex = headers.indexOf('Pagado ');
       }
       
-      // Buscar la fila con el ID
+      if (idColumnIndex === -1 || pagadoColumnIndex === -1) {
+        throw new Error('Columnas necesarias no encontradas. Pagado index: ' + pagadoColumnIndex);
+      }
+      
       let rowIndex = -1;
       for (let i = 1; i < dataValues.length; i++) {
         if (String(dataValues[i][idColumnIndex]) === String(bookingId)) {
@@ -160,7 +164,6 @@ function doPost(e) {
         throw new Error('Reservación no encontrada');
       }
       
-      // Actualizar solo la columna de Pagado
       sheet.getRange(rowIndex, pagadoColumnIndex + 1).setValue('SÍ');
       
       return ContentService.createTextOutput(JSON.stringify({
