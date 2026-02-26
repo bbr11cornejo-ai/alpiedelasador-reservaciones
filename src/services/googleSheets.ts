@@ -105,7 +105,15 @@ export const getBookingsFromSheets = async (): Promise<Booking[]> => {
           eventType: String(row['Tipo de Evento'] || row.eventType || ''),
           duration: String(row['Duración'] || row.Duracion || row.duration || ''),
           rentalCost: parseFloat(String(row.Costo || row.rentalCost || 0).replace(/[^0-9.-]/g, '')),
-          status: (String(row.Estado || row.status || 'free').toLowerCase() as 'free' | 'reserved' | 'paid') || 'free',
+          // Si la columna "Pagado" tiene "SÍ" o "SI", el status es "paid"
+          status: (() => {
+            const isPaid = row.Pagado === 'SÍ' || 
+                          row.Pagado === 'SI' || 
+                          row['Pagado '] === 'SÍ' ||
+                          row['Pagado '] === 'SI';
+            if (isPaid) return 'paid';
+            return (String(row.Estado || row.status || 'free').toLowerCase() as 'free' | 'reserved' | 'paid') || 'free';
+          })(),
           createdAt: String(row.Creado || row.createdAt || ''),
           paymentProofUrl: String(row['URL Comprobante'] || row['URL Comprobant'] || row.paymentProofUrl || ''),
           clientFolderId: String(row['ID Carpeta Drive'] || row.clientFolderId || ''),

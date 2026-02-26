@@ -81,17 +81,8 @@ const Index = () => {
       console.log('✅ Reservaciones cargadas exitosamente:', sheetsBookings.length);
       console.log('📋 Primeras 2 reservaciones:', sheetsBookings.slice(0, 2));
       
-      // Aplicar estado "paid" desde localStorage
-      const paidBookings = JSON.parse(localStorage.getItem('paidBookings') || '[]');
-      const bookingsWithPaidStatus = sheetsBookings.map(booking => {
-        if (paidBookings.includes(booking.id)) {
-          return { ...booking, status: 'paid' as const };
-        }
-        return booking;
-      });
-      
-      setBookings(bookingsWithPaidStatus);
-      console.log('✅ Estado de bookings actualizado con', bookingsWithPaidStatus.length, 'reservaciones');
+      setBookings(sheetsBookings);
+      console.log('✅ Estado de bookings actualizado con', sheetsBookings.length, 'reservaciones');
     } catch (error: any) {
       console.error('❌ Error cargando reservaciones:', error);
       console.error('❌ Stack trace:', error.stack);
@@ -241,26 +232,39 @@ const Index = () => {
     }
   };
 
-  const handleMarkPaid = (bookingId: string) => {
-    // Cambiar estado local a "paid"
-    setBookings(prev => prev.map(b => 
-      b.id === bookingId ? { ...b, status: 'paid' } : b
-    ));
-    
-    // Guardar en localStorage para persistir entre recargas
-    const paidBookings = JSON.parse(localStorage.getItem('paidBookings') || '[]');
-    if (!paidBookings.includes(bookingId)) {
-      paidBookings.push(bookingId);
-      localStorage.setItem('paidBookings', JSON.stringify(paidBookings));
+  const handleMarkPaid = async (bookingId: string) => {
+    try {
+      // Llamar al Apps Script para marcar como pagado en Google Sheets
+      const result = await markBookingAsPaid(bookingId);
+      
+      if (result.success) {
+        // Actualizar UI local después de guardar
+        setBookings(prev => prev.map(b => 
+          b.id === bookingId ? { ...b, status: 'paid' } : b
+        ));
+        
+        toast({
+          title: "✅ Marcado como Pagado",
+          description: "El estado cambió a pagado (azul) en todos los dispositivos.",
+        });
+        
+        // Cerrar el formulario después de marcar como pagado
+        setSelectedDate(null);
+      } else {
+        toast({
+          title: "❌ Error",
+          description: result.error || "No se pudo marcar como pagado",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error marcando como pagado:', error);
+      toast({
+        title: "❌ Error",
+        description: "Hubo un problema al marcar como pagado",
+        variant: "destructive"
+      });
     }
-    
-    toast({
-      title: "✅ Marcado como Pagado",
-      description: "El estado cambió a pagado (azul) y se guardó localmente.",
-    });
-    
-    // Cerrar el formulario después de marcar como pagado
-    setSelectedDate(null);
   };
 
   const handleUpdateBooking = async (bookingData: Booking & { paymentProofFile?: File }) => {
